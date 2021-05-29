@@ -1,5 +1,6 @@
 from PyQt5 import QtCore, QtWidgets
-
+from scipy.io import wavfile
+from scipy. signal import spectrogram 
 import logging
 
 InfoLogger = logging.getLogger(__name__)
@@ -55,24 +56,27 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.Controls1()
         self.SignalMapper.mapped.connect(self.SelectFiles)
         self.Layout_Control2 = QtWidgets.QGridLayout()
+        self.Layout_Controls.setColumnStretch(0, 2)
+        self.Layout_Controls.setColumnStretch(1, 10)
         #self.Controls2()
 
         self.Table = QtWidgets.QTableWidget()
-        self.Table.setRowCount(4)
+        self.Table.setRowCount(10)
         self.Table.setColumnCount(2)
-        self.Table.setItem(0,0, QtWidgets.QTableWidgetItem("Song Name"))
-        self.Table.setItem(0,1, QtWidgets.QTableWidgetItem("Similarity index"))
-        self.Table.setItem(1,0, QtWidgets.QTableWidgetItem("Cell (2,1)"))
-        self.Table.setItem(1,1, QtWidgets.QTableWidgetItem("Cell (2,2)"))
-        self.Table.setItem(2,0, QtWidgets.QTableWidgetItem("Cell (3,1)"))
-        self.Table.setItem(2,1, QtWidgets.QTableWidgetItem("Cell (3,2)"))
-        self.Table.setItem(3,0, QtWidgets.QTableWidgetItem("Cell (4,1)"))
-        self.Table.setItem(3,1, QtWidgets.QTableWidgetItem("Cell (4,2)"))
+        self.Table.setHorizontalHeaderLabels(["Song Name","Similarity index"])
+        self.Table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        for x in range(10):
+            for y in range(2):
+                self.Table.setItem(x,y, QtWidgets.QTableWidgetItem("m"))
+        header = self.Table.horizontalHeader()    
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         #self.Table.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
         self.Table.resizeColumnsToContents()
 
         self.Layout_Main.addWidget(self.Table,1,0)
-
+        self.Layout_Main.setRowStretch(0,1)
+        self.Layout_Main.setRowStretch(1,10)
         self.MessageBox = QtWidgets.QMessageBox(QtWidgets.QMessageBox.Warning, "Error", "Error")
         self.main_widget.setFocus()
         self.setCentralWidget(self.main_widget)
@@ -171,10 +175,16 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             self.Control2Label1.setText('File Name: ' + Imagepaths[1])
         elif index == 2:
             self.Control2Label2.setText('File Name: ' + Imagepaths[1])
-        print('File path: {}\nFile Name: {}'.format(Imagepaths[0], Imagepaths[1]))
+        self.CreateSpecgram(Imagepaths[0])
+        #print('File path: {}\nFile Name: {}'.format(Imagepaths[0], Imagepaths[1]))
 
     def DisplayError(self, title, Message):
         DebugLogger.debug('{}\n'.format(title))
         self.MessageBox.setWindowTitle(title)
         self.MessageBox.setText(Message)
         self.MessageBox.exec()
+
+    def CreateSpecgram(self, path):
+        SampleRate, Data = wavfile.read(path)
+        frequencies, times, specgram = spectrogram(Data, SampleRate)
+        print(specgram)
