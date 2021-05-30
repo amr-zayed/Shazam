@@ -14,20 +14,40 @@ from scipy.ndimage.morphology import (generate_binary_structure, iterate_structu
 from operator import itemgetter
 
 
-rate, data1 = wav.read('Group5_Song1_full-.wav')
+rate, data1 = wav.read('Group4_Song1_Full.wav')
 data = list(map(itemgetter(0), data1))
 print(len(data),data[100000:100010])
 # plt.specgram(data,NFFT=4096,Fs=44100,window=mlab.window_hanning,noverlap=int(4096 * 0.5))
 # plt.show()
 
-a = ("John", "Charles", "Mike")
-b = ("Jenny", "Christy", "Monica", "Vicky")
-y=zip(a,b)
-coco=list(zip(a,b))
-print(list(y))
-print(len(coco))
-x = [(27, 283), (27, 424), (27, 468), (27, 557), (27, 617), (27, 860), (27, 973), (27, 1065), (27, 1183), (27, 1255)]
-print(x,len(x))
+# a = ("John", "Charles", "Mike")
+# b = ("Jenny", "Christy", "Monica", "Vicky")
+# y=zip(a,b)
+# coco=list(zip(a,b))
+# print(list(y))
+# print(len(coco))
+# x = [(27, 283), (27, 424), (27, 468), (27, 557), (27, 617), (27, 860), (27, 973), (27, 1065), (27, 1183), (27, 1255)]
+# print(x,len(x))
+
+# initializing string
+str1 = "GeeksforGeeks"
+  
+# encoding GeeksforGeeks using encode()
+# then sending to SHA1()
+result = hashlib.sha1(str1.encode())
+
+# printing the equivalent hexadecimal value.
+print("The hexadecimal equivalent of SHA1 is : ")
+print(result.hexdigest())
+def create_generator():
+    mylist = range(3)
+    for i in mylist:
+        print(i)
+        yield i*i
+mygenerator = create_generator() # create a generator
+print(mygenerator) # mygenerator is an object!
+# for i in mygenerator:
+#     print(i)
 
 IDX_FREQ_I = 0
 IDX_TIME_J = 1
@@ -129,8 +149,7 @@ def get_2D_peaks(arr2D, plot=False, amp_min=DEFAULT_AMP_MIN):
     # find local maxima using our fliter shape
     local_max = maximum_filter(arr2D, footprint=neighborhood) == arr2D
     background = (arr2D == 0)
-    eroded_background = binary_erosion(background, structure=neighborhood,
-                                       border_value=1)
+    eroded_background = binary_erosion(background, structure=neighborhood, border_value=1)
 
     # Boolean mask of arr2D with True at peaks
     detected_peaks = local_max ^ eroded_background
@@ -194,9 +213,10 @@ def generate_hashes(peaks, fan_value=DEFAULT_FAN_VALUE):
                 if t_delta >= MIN_HASH_TIME_DELTA and t_delta <= MAX_HASH_TIME_DELTA:
                     x=4
                     #print("in if")
-                    #h = hashlib.sha1("%s|%s|%s" % (str(freq1), str(freq2), str(t_delta)))
+                    h = hashlib.sha1(("%s|%s|%s" % (str(freq1), str(freq2), str(t_delta))).encode())
+                    print(h.hexdigest())
                     #yield (h.hexdigest()[0:FINGERPRINT_REDUCTION], t1)
 
     return 1
 
-fingerprint(data,plots=True)
+#fingerprint(data,plots=True)
