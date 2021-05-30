@@ -186,4 +186,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
     def CreateSpecgram(self, path):
         SampleRate, Data = wavfile.read(path)
+        if len(Data)>60*SampleRate:
+            Data = Data[0:60*SampleRate]
         frequencies, times, specgram = spectrogram(Data, SampleRate)
