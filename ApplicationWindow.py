@@ -3,7 +3,7 @@ from scipy.io import wavfile
 import numpy as np
 from scipy.signal import spectrogram, resample
 import logging
-
+from audio import *
 InfoLogger = logging.getLogger(__name__)
 InfoLogger.setLevel(logging.INFO)
 
@@ -77,10 +77,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.main_widget)
         self.resize(1280,720)
 
-        self.Browse1=False
-        self.Browse2=False
-        self.PathList = ['t','t']
-        self.AudioList = []
+        self.audio=audio()
+        
 
 
     def fileQuit(self):
@@ -161,24 +159,24 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
     def SelectFiles(self, index):
         Imagepaths = self.open_dialog_box()
-        if len(Imagepaths)==0:
+        if len(Imagepaths[0])==0:
             return
         
         if index == 0:
             self.Control1Label.setText('File Name: ' + Imagepaths[1])
-            self.OneAudio(Imagepaths[0])
+            self.audio.OneAudio(Imagepaths[0])
         elif index == 1:
-            self.PathList[0]= Imagepaths[0]
-            self.Browse1=True
+            self.audio.SetPathList(Imagepaths[0],index)
+            self.audio.SetBrowse1(True)
             self.Control2Labels[0].setText('File Name: ' + Imagepaths[1])
-            self.CreateAudioList()
+            self.audio.CreateAudioList()
         elif index == 2:
-            self.PathList[1]= Imagepaths[0]
-            self.Browse2=True
+            self.audio.SetPathList(Imagepaths[0],index)
+            self.audio.SetBrowse2(True)
             self.Control2Labels[1].setText('File Name: ' + Imagepaths[1])
-            self.CreateAudioList()
+            self.audio.CreateAudioList()
 
-        if self.Browse1 and self.Browse2:
+        if self.audio.GetBrowse1() and self.audio.GetBrowse2():
             self.Control2Slider.setEnabled(True)
 
     def DisplayError(self, title, Message):
@@ -187,51 +185,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.MessageBox.setText(Message)
         self.MessageBox.exec()
 
-    def CreateAudioList(self):
-        if not (self.Browse1 and self.Browse2):
-            return
-        for i in range(2):
-            if len(self.AudioList)==0 or len(self.AudioList)==1:
-                SampleRate, Data = wavfile.read(self.PathList[i])
-                self.AudioList.append([SampleRate, Data])
-            else:
-                self.AudioList[i]= wavfile.read(self.PathList[i])
-            
-            if len(self.AudioList[i][1])>60*self.AudioList[i][0]:
-                self.AudioList[i][1] = self.AudioList[i][1][0:60*self.AudioList[i][0]]
-                
+   
     
     def MixAudios(self):
-        SliderValue = self.Control2Slider.value()
-        InfoLogger.info('Slider value: {}'.format(SliderValue))
-        InfoLogger.info('Sample rate 1: {}\nSample rate 2: {}'.format(self.AudioList[0][0],self.AudioList[1][0]))
-        SampleRate1, Data1 = self.AudioList[0]
-        SampleRate2, Data2 = self.AudioList[1]
-        OutputSampleRate = None
-        OutputData = []
-        if SampleRate1==SampleRate2:
-            OutputSampleRate = SampleRate2
-        else:
-            OutputSampleRate = max([SampleRate1, SampleRate2])
-            InfoLogger.info('Output sample rate: {}'.format(OutputSampleRate))
-            InfoLogger.info("length data 1: {}\nlength data 2: {}".format(len(Data1), len(Data2)))
-            if OutputSampleRate==SampleRate1:
-                Data2 = resample(Data2, len(Data1)).astype(np.int16)
-            else:
-                Data1 = resample(Data1, len(Data2)).astype(np.int16)
-        InfoLogger.info("length data 1: {}\nlength data 2: {}".format(len(Data1), len(Data2)))
-        OutputData = (Data1*(SliderValue/100)+Data2*(1-(SliderValue/100))).astype(np.int16)
-        self.WavToHash(OutputData, OutputSampleRate)
-
-        wavfile.write('audiotest\\Data1.wav',SampleRate1,Data1)
-        wavfile.write('audiotest\\Data2.wav',SampleRate2,Data2)
-        wavfile.write('audiotest\\Output.wav',OutputSampleRate,OutputData)
-
-    def OneAudio(self, path):
-        SampleRate, Data = wavfile.read(path)
-        if len(Data)>60*SampleRate:
-            Data = Data[0:60*SampleRate]
-        self.WavToHash(Data, SampleRate)
-
-    def WavToHash(self, Data, SampleRate):
-        frequencies, times, specgram = spectrogram(Data, SampleRate)
+        self.audio.MixAudios(self.Control2Slider.value())
+        

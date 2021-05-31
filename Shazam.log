@@ -1,26 +1,2 @@
-DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Group3_Song1_Full.wav
-DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Group4_Song4_Full.wav
-INFO:ApplicationWindow.py:MixAudios:   Slider value: 38
-INFO:ApplicationWindow.py:MixAudios:   Sample rate 1: 48000
-Sample rate 2: 44100
-INFO:ApplicationWindow.py:MixAudios:   Output sample rate: 48000
-INFO:ApplicationWindow.py:MixAudios:   length data 1: 2880000
-length data 2: 2646000
-INFO:ApplicationWindow.py:MixAudios:   length data 1: 2880000
-length data 2: 2880000
-INFO:ApplicationWindow.py:MixAudios:   Slider value: 95
-INFO:ApplicationWindow.py:MixAudios:   Sample rate 1: 48000
-Sample rate 2: 44100
-INFO:ApplicationWindow.py:MixAudios:   Output sample rate: 48000
-INFO:ApplicationWindow.py:MixAudios:   length data 1: 2880000
-length data 2: 2646000
-INFO:ApplicationWindow.py:MixAudios:   length data 1: 2880000
-length data 2: 2880000
-INFO:ApplicationWindow.py:MixAudios:   Slider value: 0
-INFO:ApplicationWindow.py:MixAudios:   Sample rate 1: 48000
-Sample rate 2: 44100
-INFO:ApplicationWindow.py:MixAudios:   Output sample rate: 48000
-INFO:ApplicationWindow.py:MixAudios:   length data 1: 2880000
-length data 2: 2646000
-INFO:ApplicationWindow.py:MixAudios:   length data 1: 2880000
-length data 2: 2880000
+DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Data1.wav
+DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Data2.wav
