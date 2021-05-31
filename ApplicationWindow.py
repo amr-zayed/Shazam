@@ -1,4 +1,3 @@
-from WavToHash import Data, SampleRate
 from PyQt5 import QtCore, QtWidgets
 from scipy.io import wavfile
 import numpy as np
@@ -215,13 +214,12 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         else:
             OutputSampleRate = max([SampleRate1, SampleRate2])
             InfoLogger.info('Output sample rate: {}'.format(OutputSampleRate))
-            if OutputSampleRate==SampleRate1:
-                NoOfSamples = round(len(Data)*OutputSampleRate/SampleRate2)
-                Data2 = resample(Data2, NoOfSamples).astype(np.int16)
-            else:
-                NoOfSamples = round(len(Data)*OutputSampleRate/SampleRate1)
-                Data1 = resample(Data1, NoOfSamples).astype(np.int16)
             InfoLogger.info("length data 1: {}\nlength data 2: {}".format(len(Data1), len(Data2)))
+            if OutputSampleRate==SampleRate1:
+                Data2 = resample(Data2, len(Data1)).astype(np.int16)
+            else:
+                Data1 = resample(Data1, len(Data2)).astype(np.int16)
+        InfoLogger.info("length data 1: {}\nlength data 2: {}".format(len(Data1), len(Data2)))
         OutputData = (Data1*(SliderValue/100)+Data2*(1-(SliderValue/100))).astype(np.int16)
         self.WavToHash(OutputData, OutputSampleRate)
 
