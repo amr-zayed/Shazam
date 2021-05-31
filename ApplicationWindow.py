@@ -1,6 +1,7 @@
 from WavToHash import Data, SampleRate
 from PyQt5 import QtCore, QtWidgets
 from scipy.io import wavfile
+import numpy as np
 from scipy.signal import spectrogram, resample
 import logging
 
@@ -56,7 +57,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.Layout_Control2 = QtWidgets.QGridLayout()
         self.Layout_Controls.setColumnStretch(0, 2)
         self.Layout_Controls.setColumnStretch(1, 10)
-        #self.Controls2()
 
         self.Table = QtWidgets.QTableWidget()
         self.Table.setRowCount(10)
@@ -65,11 +65,9 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.Table.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         for x in range(10):
             for y in range(2):
-                self.Table.setItem(x,y, QtWidgets.QTableWidgetItem("m"))
+                self.Table.setItem(x,y, QtWidgets.QTableWidgetItem(""))
         header = self.Table.horizontalHeader()    
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        #self.Table.setSizeAdjustPolicy(QtWidgets.QAbstractScrollArea.AdjustToContents)
         self.Table.resizeColumnsToContents()
 
         self.Layout_Main.addWidget(self.Table,1,0)
@@ -121,19 +119,16 @@ class ApplicationWindow(QtWidgets.QMainWindow):
     def Controls2(self):
         self.Layout_Control2 = QtWidgets.QGridLayout()
         self.Layout_Control2Top = QtWidgets.QGridLayout()
-        self.Control2Button1 = QtWidgets.QPushButton("Browse File")
-        self.Control2Button1.clicked.connect(self.SignalMapper.map)
-        self.SignalMapper.setMapping(self.Control2Button1, 1)
-        self.Control2Label1 = QtWidgets.QLabel('No Song Selected')
-        self.Layout_Control2Top.addWidget(self.Control2Button1, 0, 0)
-        self.Layout_Control2Top.addWidget(self.Control2Label1, 0, 1)
+        self.Control2Buttons=[]
+        self.Control2Labels=[]
+        for i in range(2):    
+            self.Control2Buttons.append(QtWidgets.QPushButton("Browse File"))
+            self.Control2Buttons[i].clicked.connect(self.SignalMapper.map)
+            self.SignalMapper.setMapping(self.Control2Buttons[i], i+1)
+            self.Control2Labels.append(QtWidgets.QLabel('No Song Selected'))
+            self.Layout_Control2Top.addWidget(self.Control2Buttons[i], 0, 2*i)
+            self.Layout_Control2Top.addWidget(self.Control2Labels[i], 0, 2*i+1)
 
-        self.Control2Button2 = QtWidgets.QPushButton("Browse File")
-        self.Control2Button2.clicked.connect(self.SignalMapper.map)
-        self.SignalMapper.setMapping(self.Control2Button2, 2)
-        self.Control2Label2 = QtWidgets.QLabel('No Song Selected')
-        self.Layout_Control2Top.addWidget(self.Control2Button2, 0, 2)
-        self.Layout_Control2Top.addWidget(self.Control2Label2, 0, 3)
         self.Control2Slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)  
         self.Control2Slider.setEnabled(False)
         self.Control2Slider.sliderReleased.connect(lambda: self.MixAudios())
@@ -160,7 +155,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         FileName = FileName + Imagepaths[i:]
         DebugLogger.debug('FileName:{}'.format(FileName))
         if Imagepaths[i:] != ".wav":
-            self.DisplayError("FILE TYPE ERROR", "File type must be an image (e.g. png or jpg)")
+            self.DisplayError("FILE TYPE ERROR", "File type must be .wav")
             Imagepaths = self.open_dialog_box()
         
         return [Imagepaths, FileName] 
@@ -176,12 +171,12 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         elif index == 1:
             self.PathList[0]= Imagepaths[0]
             self.Browse1=True
-            self.Control2Label1.setText('File Name: ' + Imagepaths[1])
+            self.Control2Labels[0].setText('File Name: ' + Imagepaths[1])
             self.CreateAudioList()
         elif index == 2:
             self.PathList[1]= Imagepaths[0]
             self.Browse2=True
-            self.Control2Label2.setText('File Name: ' + Imagepaths[1])
+            self.Control2Labels[1].setText('File Name: ' + Imagepaths[1])
             self.CreateAudioList()
 
         if self.Browse1 and self.Browse2:
@@ -209,7 +204,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
     
     def MixAudios(self):
         SliderValue = self.Control2Slider.value()
-        print('Sample rate 1: {}\nSample rate 2: {}'.format(self.AudioList[0][0],self.AudioList[1][0]))
+        InfoLogger.info('Slider value: {}'.format(SliderValue))
+        InfoLogger.info('Sample rate 1: {}\nSample rate 2: {}'.format(self.AudioList[0][0],self.AudioList[1][0]))
         SampleRate1, Data1 = self.AudioList[0]
         SampleRate2, Data2 = self.AudioList[1]
         OutputSampleRate = None
@@ -218,26 +214,26 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             OutputSampleRate = SampleRate2
         else:
             OutputSampleRate = max([SampleRate1, SampleRate2])
-            print('Output sample rate: {}'.format(OutputSampleRate))
+            InfoLogger.info('Output sample rate: {}'.format(OutputSampleRate))
             if OutputSampleRate==SampleRate1:
                 NoOfSamples = round(len(Data)*OutputSampleRate/SampleRate2)
-                print(Data2)
-                Data2 = resample(Data2, NoOfSamples)
-                print(Data2)
+                Data2 = resample(Data2, NoOfSamples).astype(np.int16)
             else:
                 NoOfSamples = round(len(Data)*OutputSampleRate/SampleRate1)
-                Data1 = resample(Data1, NoOfSamples)
-            print("length data 1: {}\nlength data 2: {}".format(len(Data1), len(Data2)))
-        OutputData = Data1*(SliderValue/100)+Data2*(1-(SliderValue/100))
-        wavfile.write('C:\\Users\\hp\\Desktop\\DSP\\audiotest\\test.wav',OutputSampleRate,Data2)
+                Data1 = resample(Data1, NoOfSamples).astype(np.int16)
+            InfoLogger.info("length data 1: {}\nlength data 2: {}".format(len(Data1), len(Data2)))
+        OutputData = (Data1*(SliderValue/100)+Data2*(1-(SliderValue/100))).astype(np.int16)
+        self.WavToHash(OutputData, OutputSampleRate)
+
+        wavfile.write('audiotest\\Data1.wav',SampleRate1,Data1)
+        wavfile.write('audiotest\\Data2.wav',SampleRate2,Data2)
+        wavfile.write('audiotest\\Output.wav',OutputSampleRate,OutputData)
 
     def OneAudio(self, path):
-        pass
         SampleRate, Data = wavfile.read(path)
         if len(Data)>60*SampleRate:
             Data = Data[0:60*SampleRate]
-        #self.WavToHash(Data, SampleRate)
+        self.WavToHash(Data, SampleRate)
 
     def WavToHash(self, Data, SampleRate):
-        pass
-        #frequencies, times, specgram = spectrogram(Data, SampleRate)
+        frequencies, times, specgram = spectrogram(Data, SampleRate)
