@@ -1,6 +1,6 @@
 import os
 from scipy.io import wavfile
-from scipy. signal import spectrogram 
+#from scipy. signal import spectrogram 
 
 def GetAllSongsPath(path):
     pathlist =[]
@@ -19,5 +19,5 @@ for path in AllPaths:
     SampleRate, Data = wavfile.read(path)
     if len(Data)>60*SampleRate:
         Data = Data[0:60*SampleRate]
-    frequencies, times, specgram = spectrogram(Data, SampleRate)
+    #frequencies, times, specgram = spectrogram(Data, SampleRate)
     #Add rest of the code here

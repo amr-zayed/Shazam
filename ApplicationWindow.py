@@ -1,6 +1,7 @@
+from WavToHash import Data, SampleRate
 from PyQt5 import QtCore, QtWidgets
 from scipy.io import wavfile
-from scipy. signal import spectrogram 
+from scipy.signal import spectrogram, resample
 import logging
 
 InfoLogger = logging.getLogger(__name__)
@@ -46,9 +47,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.ModeComboBox.addItems(["1 audio", "2 audios"])
         self.ModeComboBox.currentIndexChanged.connect(lambda: self.ModeChanged())
         self.Layout_ControlsLeft.addWidget(self.ModeComboBox)
-        self.MatchButton = QtWidgets.QPushButton("Match")
-        self.MatchButton.clicked.connect(lambda: self.MatchSong())
-        self.Layout_ControlsLeft.addWidget(self.MatchButton)
 
         self.SignalMapper = QtCore.QSignalMapper()
 
@@ -82,6 +80,11 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.setCentralWidget(self.main_widget)
         self.resize(1280,720)
 
+        self.Browse1=False
+        self.Browse2=False
+        self.PathList = ['t','t']
+        self.AudioList = []
+
 
     def fileQuit(self):
         InfoLogger.info("App closed")
@@ -98,9 +101,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
             self.Layout_Controls.removeItem(self.Layout_Control1)
             self.Controls2()
             self.Layout_Controls.addLayout(self.Layout_Control2, 0,1)
-
-    def MatchSong(self):
-        print("Match Songs")
 
     def Controls1(self):
         self.Layout_Control1 = QtWidgets.QGridLayout()
@@ -135,7 +135,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.Layout_Control2Top.addWidget(self.Control2Button2, 0, 2)
         self.Layout_Control2Top.addWidget(self.Control2Label2, 0, 3)
         self.Control2Slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)  
-
+        self.Control2Slider.setEnabled(False)
+        self.Control2Slider.sliderReleased.connect(lambda: self.MixAudios())
         self.Layout_Control2.addLayout(self.Layout_Control2Top, 0, 0)
         self.Layout_Control2.addWidget(self.Control2Slider, 1, 0)
 
@@ -171,12 +172,20 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         
         if index == 0:
             self.Control1Label.setText('File Name: ' + Imagepaths[1])
+            self.OneAudio(Imagepaths[0])
         elif index == 1:
+            self.PathList[0]= Imagepaths[0]
+            self.Browse1=True
             self.Control2Label1.setText('File Name: ' + Imagepaths[1])
+            self.CreateAudioList()
         elif index == 2:
+            self.PathList[1]= Imagepaths[0]
+            self.Browse2=True
             self.Control2Label2.setText('File Name: ' + Imagepaths[1])
-        self.CreateSpecgram(Imagepaths[0])
-        #print('File path: {}\nFile Name: {}'.format(Imagepaths[0], Imagepaths[1]))
+            self.CreateAudioList()
+
+        if self.Browse1 and self.Browse2:
+            self.Control2Slider.setEnabled(True)
 
     def DisplayError(self, title, Message):
         DebugLogger.debug('{}\n'.format(title))
@@ -184,8 +193,51 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.MessageBox.setText(Message)
         self.MessageBox.exec()
 
-    def CreateSpecgram(self, path):
+    def CreateAudioList(self):
+        if not (self.Browse1 and self.Browse2):
+            return
+        for i in range(2):
+            if len(self.AudioList)==0 or len(self.AudioList)==1:
+                SampleRate, Data = wavfile.read(self.PathList[i])
+                self.AudioList.append([SampleRate, Data])
+            else:
+                self.AudioList[i]= wavfile.read(self.PathList[i])
+            
+            if len(self.AudioList[i][1])>60*self.AudioList[i][0]:
+                self.AudioList[i][1] = self.AudioList[i][1][0:60*self.AudioList[i][0]]
+                
+    
+    def MixAudios(self):
+        SliderValue = self.Control2Slider.value()
+        print('Sample rate 1: {}\nSample rate 2: {}'.format(self.AudioList[0][0],self.AudioList[1][0]))
+        SampleRate1, Data1 = self.AudioList[0]
+        SampleRate2, Data2 = self.AudioList[1]
+        OutputSampleRate = None
+        OutputData = []
+        if SampleRate1==SampleRate2:
+            OutputSampleRate = SampleRate2
+        else:
+            OutputSampleRate = max([SampleRate1, SampleRate2])
+            print('Output sample rate: {}'.format(OutputSampleRate))
+            if OutputSampleRate==SampleRate1:
+                NoOfSamples = round(len(Data)*OutputSampleRate/SampleRate2)
+                print(Data2)
+                Data2 = resample(Data2, NoOfSamples)
+                print(Data2)
+            else:
+                NoOfSamples = round(len(Data)*OutputSampleRate/SampleRate1)
+                Data1 = resample(Data1, NoOfSamples)
+            print("length data 1: {}\nlength data 2: {}".format(len(Data1), len(Data2)))
+        OutputData = Data1*(SliderValue/100)+Data2*(1-(SliderValue/100))
+        wavfile.write('C:\\Users\\hp\\Desktop\\DSP\\audiotest\\test.wav',OutputSampleRate,Data2)
+
+    def OneAudio(self, path):
+        pass
         SampleRate, Data = wavfile.read(path)
         if len(Data)>60*SampleRate:
             Data = Data[0:60*SampleRate]
-        frequencies, times, specgram = spectrogram(Data, SampleRate)
+        #self.WavToHash(Data, SampleRate)
+
+    def WavToHash(self, Data, SampleRate):
+        pass
+        #frequencies, times, specgram = spectrogram(Data, SampleRate)
