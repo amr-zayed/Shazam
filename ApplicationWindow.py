@@ -87,6 +87,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
     def ModeChanged(self):
         if self.ModeComboBox.currentIndex()==0:
+            self.audio.Setmode()
             self.DeleteControls2()
             self.Layout_Controls.removeItem(self.Layout_Control2)
             self.Controls1()
@@ -185,8 +186,15 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.MessageBox.setText(Message)
         self.MessageBox.exec()
 
-   
-    
     def MixAudios(self):
         self.audio.MixAudios(self.Control2Slider.value())
         
+    def SetTable(self):
+        """Uncomment this when GetTable is implemented"""
+        #Table = self.audio.GetTable()
+
+        #range(10) should be changed to the number of rows of Table
+        for x in range(10):
+            for y in range(2):
+                #you should set the table items using the np array Table
+                self.Table.setItem(x,y, QtWidgets.QTableWidgetItem(""))

@@ -1,2 +1,7 @@
-DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Data1.wav
-DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Data2.wav
+DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Group3_Song1_Music.wav
+DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Group3_Song1_Full.wav
+DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Group3_Song4_Full.wav
+DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Group4_Song4_Full.wav
+DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Group7_Song3_Full.wav
+DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Group4_Song4_Music.wav
+DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Group7_Song3_Music.wav
