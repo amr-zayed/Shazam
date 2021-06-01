@@ -76,43 +76,33 @@ class audio():
     def MixAudios(self,value):
         SliderValue = value
         InfoLogger.info('Slider value: {}'.format(SliderValue))
-        InfoLogger.info('Sample rate 1: {}\nSample rate 2: {}'.format(self.AudioList[0][0],self.AudioList[1][0]))
+        InfoLogger.info('Sample rate 1: {}, Sample rate 2: {}'.format(self.AudioList[0][0],self.AudioList[1][0]))
         SampleRate1, Data1 = self.AudioList[0]
         SampleRate2, Data2 = self.AudioList[1]
         OutputSampleRate = None
         OutputData = []
-        # if SampleRate1==SampleRate2:
-        #     OutputSampleRate = SampleRate2
-        # else:
-        #     OutputSampleRate = max([SampleRate1, SampleRate2])
-        #     InfoLogger.info('Output sample rate: {}'.format(OutputSampleRate))
-        #     InfoLogger.info("length data 1: {}\nlength data 2: {}".format(len(Data1), len(Data2)))
-        #     if OutputSampleRate==SampleRate1:
-        #         Data2 = resample(Data2, len(Data1)).astype(np.int16)
-        #     else:
-        #         Data1 = resample(Data1, len(Data2)).astype(np.int16)
-
-        #OutputSampleRate = max([SampleRate1, SampleRate2])
-        self.sampleRate = max([SampleRate1, SampleRate2])
-        InfoLogger.info('Output sample rate: {}'.format(OutputSampleRate))
-        InfoLogger.info("length data 1: {}\nlength data 2: {}".format(len(Data1), len(Data2)))
-        if OutputSampleRate==SampleRate1:
-            Data2 = resample(Data2, len(Data1)).astype(np.int16)
+        if SampleRate1==SampleRate2:
+            OutputSampleRate = SampleRate2
         else:
-            Data1 = resample(Data1, len(Data2)).astype(np.int16)
+            OutputSampleRate = max([SampleRate1, SampleRate2])
+            InfoLogger.info('Output sample rate: {}'.format(OutputSampleRate))
+            InfoLogger.info("length data 1: {}\nlength data 2: {}".format(len(Data1), len(Data2)))
+            if OutputSampleRate==SampleRate1:
+                Data2 = resample(Data2, len(Data1)).astype(np.int16)
+            else:
+                Data1 = resample(Data1, len(Data2)).astype(np.int16)
         InfoLogger.info("length data 1: {}\nlength data 2: {}".format(len(Data1), len(Data2)))
-        #OutputData = (Data1*(SliderValue/100)+Data2*(1-(SliderValue/100))).astype(np.int16)
+        self.sampleRate = OutputSampleRate
         self.Data = (Data1*(SliderValue/100)+Data2*(1-(SliderValue/100))).astype(np.int16)
         self.WavToHash()
         self.GetSimilarityIndex()
-        # wavfile.write('audiotest\\Data1.wav',SampleRate1,Data1)
-        # wavfile.write('audiotest\\Data2.wav',SampleRate2,Data2)
-        # wavfile.write('audiotest\\Output.wav',OutputSampleRate,OutputData)
+        wavfile.write('audiotest\\Data1.wav',SampleRate1,Data1)
+        wavfile.write('audiotest\\Data2.wav',SampleRate2,Data2)
+        wavfile.write('audiotest\\Output.wav',self.sampleRate,self.Data)
     
     def OneAudio(self, path):
         SampleRate, Data1 = wavfile.read(path)
         Data = np.array(list(map(itemgetter(0), Data1)))
-
         if len(Data)>60*SampleRate:
             Data = Data[0:60*SampleRate]
         self.Data=Data
@@ -143,22 +133,29 @@ class audio():
         path = "Database"
         self.similarityList = []
         for filename in os.listdir(path):    
-            print(filename)
             songFile = open(os.path.join(path, filename), 'r')
             songHashes = songFile.readlines()
             similarity = 0
             for hashcount in range(len(songHashes)):
                 similarity += abs(hex_to_hash(songHashes[hashcount].strip())- hex_to_hash(self.HashesList[hashcount]))
                 #similarity += math.exp(pow(abs(hex_to_hash(songHashes[hashcount].strip())- hex_to_hash(self.HashesList[hashcount])),2))
-            self.similarityList.append([similarity,filename.split(sep=".")[0]])
-
+            self.similarityList.append([filename.split(sep=".")[0], similarity])
+            #self.similarityList = np.append(self.similarityList, [similarity,filename.split(sep=".")[0]])
             # print(songHashes[0].strip(),type(songHashes[1].strip()))
             # #print(fromstring('6f6c6169736372617a79') - fromstring('6f6c6169736372617a79') )
             # print(hex_to_hash(Lines[0].strip())- hex_to_hash(Lines[1].strip()))
             # break
-        print(self.similarityList)
-        print(sorted(self.similarityList,key=lambda x: (x[0])))
-        self.similarityList = sorted(self.similarityList,key=lambda x: (x[0]))
+        self.similarityList = sorted(self.similarityList,key=lambda x: (x[1]))
 
     def GetTable(self):
-        return self.similarityList
+        return np.array(self.similarityList)
+
+    def ResetAll(self):
+        self.AudioList = []
+        self.mode=0
+        self.Table = None
+        self.Data =[]
+        self.sampleRate = 44100 
+        self.FeaturesList = []
+        self.HashesList = []
+        self.similarityList = []

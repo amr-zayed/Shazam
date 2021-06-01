@@ -87,7 +87,6 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
     def ModeChanged(self):
         if self.ModeComboBox.currentIndex()==0:
-            self.audio.Setmode()
             self.DeleteControls2()
             self.Layout_Controls.removeItem(self.Layout_Control2)
             self.Controls1()
@@ -134,6 +133,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.Layout_Control2.addWidget(self.Control2Slider, 1, 0)
 
     def DeleteControls2(self):
+        self.audio.SetBrowse1(False)
+        self.audio.SetBrowse2(False)
         for i in range(4):
             self.Layout_Control2.itemAt(0).layout().itemAt(i).widget().deleteLater()
         self.Layout_Control2.itemAt(0).layout().deleteLater()
@@ -142,6 +143,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
     def open_dialog_box(self):
         filename = QtWidgets.QFileDialog.getOpenFileName()
         Imagepaths = filename[0]
+        if len(Imagepaths)==0:
+            return [""]
         i=0
         FileName = ""
         while Imagepaths[i] != ".":
@@ -166,6 +169,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         if index == 0:
             self.Control1Label.setText('File Name: ' + Imagepaths[1])
             self.audio.OneAudio(Imagepaths[0])
+            self.SetTable()
         elif index == 1:
             self.audio.SetPathList(Imagepaths[0],index)
             self.audio.SetBrowse1(True)
@@ -179,6 +183,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         if self.audio.GetBrowse1() and self.audio.GetBrowse2():
             self.Control2Slider.setEnabled(True)
+            self.audio.MixAudios(self.Control2Slider.value())
+            self.SetTable()
 
     def DisplayError(self, title, Message):
         DebugLogger.debug('{}\n'.format(title))
@@ -187,19 +193,17 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.MessageBox.exec()
 
     def MixAudios(self):
+        self.audio.CreateAudioList()
         self.audio.MixAudios(self.Control2Slider.value())
+        self.SetTable()
         
     def SetTable(self):
-        """Uncomment this when GetTable is implemented"""
         Table = self.audio.GetTable()
-
-        #range(10) should be changed to the number of rows of Table
-        # for song in range(len(Table)):
-        #     self.Table.setItem(song[1],song[0], QtWidgets.QTableWidgetItem(""))
-        #     #for y in range(2):
-        print("update")
-        for x in range(len(Table)):
-            for y in range(2):
+        row, column = Table.shape
+        self.Table.setRowCount(row)
+        self.Table.setColumnCount(column)
+        InfoLogger.info('Setting Table')
+        for x in range(row):
+            for y in range(column):
                 self.Table.setItem(x,y, QtWidgets.QTableWidgetItem(Table[x][y]))
-        
-                #you should set the table items using the np array Table
+        self.audio.ResetAll()
