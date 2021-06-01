@@ -45,6 +45,7 @@ for s in range(len(songs_list)):
     songHashes.append(PerceptualHash(features[1]))
     songHashes.append(PerceptualHash(features[2]))
     
+    
     Hashes_list.append(songHashes)
     songHashes=[]
 

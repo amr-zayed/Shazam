@@ -7,6 +7,8 @@ from scipy.io import wavfile
 import numpy as np
 from scipy.signal import spectrogram, resample
 import logging
+from PIL import Image
+
 
 InfoLogger = logging.getLogger(__name__)
 InfoLogger.setLevel(logging.INFO)
@@ -29,6 +31,10 @@ class audio():
          self.AudioList = []
          self.mode=0
          self.Table = None
+         self.Data =[]
+         self.sampleRate = 44100 
+         self.FeaturesList = []
+         self.HashesLiat = []
     
     def Setmode(self,m):
         self.mode=m
@@ -68,19 +74,29 @@ class audio():
         SampleRate2, Data2 = self.AudioList[1]
         OutputSampleRate = None
         OutputData = []
-        if SampleRate1==SampleRate2:
-            OutputSampleRate = SampleRate2
-        else:
-            OutputSampleRate = max([SampleRate1, SampleRate2])
-            InfoLogger.info('Output sample rate: {}'.format(OutputSampleRate))
-            InfoLogger.info("length data 1: {}\nlength data 2: {}".format(len(Data1), len(Data2)))
-            if OutputSampleRate==SampleRate1:
-                Data2 = resample(Data2, len(Data1)).astype(np.int16)
-            else:
-                Data1 = resample(Data1, len(Data2)).astype(np.int16)
+        # if SampleRate1==SampleRate2:
+        #     OutputSampleRate = SampleRate2
+        # else:
+        #     OutputSampleRate = max([SampleRate1, SampleRate2])
+        #     InfoLogger.info('Output sample rate: {}'.format(OutputSampleRate))
+        #     InfoLogger.info("length data 1: {}\nlength data 2: {}".format(len(Data1), len(Data2)))
+        #     if OutputSampleRate==SampleRate1:
+        #         Data2 = resample(Data2, len(Data1)).astype(np.int16)
+        #     else:
+        #         Data1 = resample(Data1, len(Data2)).astype(np.int16)
+
+        #OutputSampleRate = max([SampleRate1, SampleRate2])
+        self.sampleRate = max([SampleRate1, SampleRate2])
+        InfoLogger.info('Output sample rate: {}'.format(OutputSampleRate))
         InfoLogger.info("length data 1: {}\nlength data 2: {}".format(len(Data1), len(Data2)))
-        OutputData = (Data1*(SliderValue/100)+Data2*(1-(SliderValue/100))).astype(np.int16)
-        self.WavToHash(OutputData, OutputSampleRate)
+        if OutputSampleRate==SampleRate1:
+            Data2 = resample(Data2, len(Data1)).astype(np.int16)
+        else:
+            Data1 = resample(Data1, len(Data2)).astype(np.int16)
+        InfoLogger.info("length data 1: {}\nlength data 2: {}".format(len(Data1), len(Data2)))
+        #OutputData = (Data1*(SliderValue/100)+Data2*(1-(SliderValue/100))).astype(np.int16)
+        self.Data = (Data1*(SliderValue/100)+Data2*(1-(SliderValue/100))).astype(np.int16)
+        self.WavToHash()
 
         wavfile.write('audiotest\\Data1.wav',SampleRate1,Data1)
         wavfile.write('audiotest\\Data2.wav',SampleRate2,Data2)
@@ -90,10 +106,31 @@ class audio():
         SampleRate, Data = wavfile.read(path)
         if len(Data)>60*SampleRate:
             Data = Data[0:60*SampleRate]
-        self.WavToHash(Data, SampleRate)
+        self.Data=Data
+        self.sampleRate=SampleRate
+        self.WavToHash()
 
-    def WavToHash(self, Data, SampleRate):
-        frequencies, times, specgram = spectrogram(Data, SampleRate)
+    def Extract_Features(self, spectro ):
+        self.FeaturesList=[spectro ,librosa.feature.melspectrogram(y=self.Data, S=spectro, sr=self.sampleRate, window='hann'),
+                librosa.feature.mfcc(y=self.Data.astype('float64'), sr=self.sampleRate),
+                librosa.feature.chroma_stft(y= self.Data, S=spectro, sr=self.sampleRate, window='hann')]
+
+    def Hash_the_song(self) -> str:
+        
+        for toHash in self.FeaturesList:
+            dataInstance = Image.fromarray(toHash)
+            self.HashesLiat.append(imagehash.phash(dataInstance, hash_size=16).__str__())
+
+
+    def WavToHash(self):
+        _,_, colorMagnitude = signal.spectrogram(self.Data, fs=self.sampleRate, window='hann')
+        
+        self.Extract_Features(colorMagnitude)
+        
+        self.Hash_the_song()
+
+    def GetSimilarityIndex(self):
+        y=0
 
     def GetTable(self):
         pass
