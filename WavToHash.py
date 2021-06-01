@@ -38,7 +38,7 @@ print(AllPaths)
 
 songHashes=[]
 
-for path in range(24):
+for path in range(len(AllPaths)):
     # SampleRate, Data = wavfile.read(path)
     # if len(Data)>60*SampleRate:
     #     Data = Data[0:60*SampleRate]

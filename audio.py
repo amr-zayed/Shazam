@@ -9,6 +9,7 @@ from scipy.signal import spectrogram, resample
 import logging
 from PIL import Image
 import os
+import math
 
 
 InfoLogger = logging.getLogger(__name__)
@@ -148,6 +149,7 @@ class audio():
             similarity = 0
             for hashcount in range(len(songHashes)):
                 similarity += abs(hex_to_hash(songHashes[hashcount].strip())- hex_to_hash(self.HashesList[hashcount]))
+                #similarity += math.exp(pow(abs(hex_to_hash(songHashes[hashcount].strip())- hex_to_hash(self.HashesList[hashcount])),2))
             self.similarityList.append([similarity,filename.split(sep=".")[0]])
 
             # print(songHashes[0].strip(),type(songHashes[1].strip()))
