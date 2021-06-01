@@ -1,1 +1,10 @@
-DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Data2.wav
+DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Group3_Song1_Full.wav
+DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Group3_Song2_Full.wav
+INFO:audio.py:MixAudios:   Slider value: 23
+INFO:audio.py:MixAudios:   Sample rate 1: 48000
+Sample rate 2: 48000
+INFO:audio.py:MixAudios:   Output sample rate: None
+INFO:audio.py:MixAudios:   length data 1: 2880000
+length data 2: 2880000
+INFO:audio.py:MixAudios:   length data 1: 2880000
+length data 2: 2880000

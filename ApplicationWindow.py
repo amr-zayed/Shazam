@@ -191,10 +191,15 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         
     def SetTable(self):
         """Uncomment this when GetTable is implemented"""
-        #Table = self.audio.GetTable()
+        Table = self.audio.GetTable()
 
         #range(10) should be changed to the number of rows of Table
-        for x in range(10):
+        # for song in range(len(Table)):
+        #     self.Table.setItem(song[1],song[0], QtWidgets.QTableWidgetItem(""))
+        #     #for y in range(2):
+        print("update")
+        for x in range(len(Table)):
             for y in range(2):
+                self.Table.setItem(x,y, QtWidgets.QTableWidgetItem(Table[x][y]))
+        
                 #you should set the table items using the np array Table
-                self.Table.setItem(x,y, QtWidgets.QTableWidgetItem(""))
