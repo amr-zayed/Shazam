@@ -1,14 +1,18 @@
-DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Group7_Song2_Full.wav
-DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Group4_Song1_Full.wav
-INFO:audio.py:MixAudios:   Slider value: 0
-INFO:audio.py:MixAudios:   Sample rate 1: 44100, Sample rate 2: 44100
-INFO:audio.py:MixAudios:   length data 1: 2646000
-length data 2: 2646000
-INFO:ApplicationWindow.py:SetTable:   Setting Table
-INFO:audio.py:MixAudios:   Slider value: 73
-INFO:audio.py:MixAudios:   Sample rate 1: 44100, Sample rate 2: 44100
-INFO:audio.py:MixAudios:   length data 1: 2646000
-length data 2: 2646000
-INFO:ApplicationWindow.py:SetTable:   Setting Table
 DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Group3_Song3_Full.wav
+DEBUG:ApplicationWindow.py:open_dialog_box:   FileName:Group3_Song1_Full.wav
+INFO:audio.py:MixAudios:   Slider value: 0
+INFO:audio.py:MixAudios:   Sample rate 1: 44100, Sample rate 2: 48000
+INFO:audio.py:MixAudios:   Output sample rate: 48000
+INFO:audio.py:MixAudios:   length data 1: 2646000
+length data 2: 2880000
+INFO:audio.py:MixAudios:   length data 1: 2880000
+length data 2: 2880000
+INFO:ApplicationWindow.py:SetTable:   Setting Table
+INFO:audio.py:MixAudios:   Slider value: 99
+INFO:audio.py:MixAudios:   Sample rate 1: 44100, Sample rate 2: 48000
+INFO:audio.py:MixAudios:   Output sample rate: 48000
+INFO:audio.py:MixAudios:   length data 1: 2646000
+length data 2: 2880000
+INFO:audio.py:MixAudios:   length data 1: 2880000
+length data 2: 2880000
 INFO:ApplicationWindow.py:SetTable:   Setting Table

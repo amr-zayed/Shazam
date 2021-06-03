@@ -10,6 +10,7 @@ import logging
 from PIL import Image
 import os
 import math
+from FeaturesAndHashes import *
 
 
 InfoLogger = logging.getLogger(__name__)
@@ -72,6 +73,7 @@ class audio():
             
             if len(self.AudioList[i][1])>60*self.AudioList[i][0]:
                 self.AudioList[i][1] = self.AudioList[i][1][0:60*self.AudioList[i][0]]
+            # self.AudioList[i][1] = self.AudioList[i][1][0:60*self.AudioList[0][0]]
 
     def MixAudios(self,value):
         SliderValue = value
@@ -81,6 +83,7 @@ class audio():
         SampleRate2, Data2 = self.AudioList[1]
         OutputSampleRate = None
         OutputData = []
+        print('Sample Rate 1: {}, Sample Rate 2: {}'.format(SampleRate1 ,SampleRate2))
         if SampleRate1==SampleRate2:
             OutputSampleRate = SampleRate2
         else:
@@ -93,12 +96,10 @@ class audio():
                 Data1 = resample(Data1, len(Data2)).astype(np.int16)
         InfoLogger.info("length data 1: {}\nlength data 2: {}".format(len(Data1), len(Data2)))
         self.sampleRate = OutputSampleRate
+        # self.sampleRate = SampleRate1
         self.Data = (Data1*(SliderValue/100)+Data2*(1-(SliderValue/100))).astype(np.int16)
         self.WavToHash()
         self.GetSimilarityIndex()
-        wavfile.write('audiotest\\Data1.wav',SampleRate1,Data1)
-        wavfile.write('audiotest\\Data2.wav',SampleRate2,Data2)
-        wavfile.write('audiotest\\Output.wav',self.sampleRate,self.Data)
     
     def OneAudio(self, path):
         SampleRate, Data1 = wavfile.read(path)
@@ -111,16 +112,14 @@ class audio():
         self.GetSimilarityIndex()
 
     def Extract_Features(self, spectro ):
-        self.FeaturesList=[spectro ,librosa.feature.melspectrogram(y=self.Data, S=spectro, sr=self.sampleRate, window='hann'),
-                librosa.feature.mfcc(y=self.Data.astype('float64'), sr=self.sampleRate),
-                librosa.feature.chroma_stft(y= self.Data, S=spectro, sr=self.sampleRate, window='hann')]
+        features=Features(self.Data,spectro,self.sampleRate)
+        self.FeaturesList =[spectro ,features[0],features[1],features[2]]
+
 
     def Hash_the_song(self) -> str:
         
         for toHash in self.FeaturesList:
-            dataInstance = Image.fromarray(toHash)
-            self.HashesList.append(imagehash.phash(dataInstance, hash_size=16).__str__())
-
+            self.HashesList.append(PerceptualHash(toHash))
 
     def WavToHash(self):
         _,_, colorMagnitude = signal.spectrogram(self.Data, fs=self.sampleRate, window='hann')
@@ -138,13 +137,7 @@ class audio():
             similarity = 0
             for hashcount in range(len(songHashes)):
                 similarity += abs(hex_to_hash(songHashes[hashcount].strip())- hex_to_hash(self.HashesList[hashcount]))
-                #similarity += math.exp(pow(abs(hex_to_hash(songHashes[hashcount].strip())- hex_to_hash(self.HashesList[hashcount])),2))
             self.similarityList.append([filename.split(sep=".")[0], similarity])
-            #self.similarityList = np.append(self.similarityList, [similarity,filename.split(sep=".")[0]])
-            # print(songHashes[0].strip(),type(songHashes[1].strip()))
-            # #print(fromstring('6f6c6169736372617a79') - fromstring('6f6c6169736372617a79') )
-            # print(hex_to_hash(Lines[0].strip())- hex_to_hash(Lines[1].strip()))
-            # break
         self.similarityList = sorted(self.similarityList,key=lambda x: (x[1]))
 
     def GetTable(self):
