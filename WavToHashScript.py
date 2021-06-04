@@ -19,25 +19,18 @@ def GetAllSongsPath(path):
             pathlist = pathlist + GetAllSongsPath(os.path.join(path, filename))
     return pathlist
 
-SongsDirectory = r'D:\collage\junior spring 2021\singal processing\Songs'
+SongsDirectory = r'C:\\Users\\hp\\Desktop\\DSP\\Songs-main\\Songs'
 HashsDirectory = ''
 AllPaths = GetAllSongsPath(SongsDirectory)
-print(AllPaths)
 
 songHashes=[]
 
 for path in range(len(AllPaths)):
-    # SampleRate, Data = wavfile.read(path)
-    # if len(Data)>60*SampleRate:
-    #     Data = Data[0:60*SampleRate]
-
     #load the song
     rate, data1 = wav.read(AllPaths[path])
     data = np.array(list(map(itemgetter(0), data1)))
     if len(data)>60*rate:
         data = data[0:60*rate]
-
-    #songs_data.append(data)
 
     #get the spectrogram 
     _,_, colorMagnitude = signal.spectrogram(data, fs=rate, window='hann')

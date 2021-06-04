@@ -73,7 +73,6 @@ class audio():
             
             if len(self.AudioList[i][1])>60*self.AudioList[i][0]:
                 self.AudioList[i][1] = self.AudioList[i][1][0:60*self.AudioList[i][0]]
-            # self.AudioList[i][1] = self.AudioList[i][1][0:60*self.AudioList[0][0]]
 
     def MixAudios(self,value):
         SliderValue = value
@@ -83,7 +82,6 @@ class audio():
         SampleRate2, Data2 = self.AudioList[1]
         OutputSampleRate = None
         OutputData = []
-        print('Sample Rate 1: {}, Sample Rate 2: {}'.format(SampleRate1 ,SampleRate2))
         if SampleRate1==SampleRate2:
             OutputSampleRate = SampleRate2
         else:
@@ -136,9 +134,9 @@ class audio():
             songHashes = songFile.readlines()
             similarity = 0
             for hashcount in range(len(songHashes)):
-                similarity += abs(hex_to_hash(songHashes[hashcount].strip())- hex_to_hash(self.HashesList[hashcount]))
-            self.similarityList.append([filename.split(sep=".")[0], similarity])
-        self.similarityList = sorted(self.similarityList,key=lambda x: (x[1]))
+                similarity = abs(hex_to_hash(songHashes[hashcount].strip())- hex_to_hash(self.HashesList[hashcount]))
+            self.similarityList.append([filename.split(sep=".")[0], (-1/2)*similarity+100])
+        self.similarityList = sorted(self.similarityList,key=lambda x: (x[1]), reverse=True)
 
     def GetTable(self):
         return np.array(self.similarityList)

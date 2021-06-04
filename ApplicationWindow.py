@@ -199,11 +199,8 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         
     def SetTable(self):
         Table = self.audio.GetTable()
-        row, column = Table.shape
-        self.Table.setRowCount(row)
-        self.Table.setColumnCount(column)
         InfoLogger.info('Setting Table')
-        for x in range(row):
-            for y in range(column):
+        for x in range(10):
+            for y in range(2):
                 self.Table.setItem(x,y, QtWidgets.QTableWidgetItem(Table[x][y]))
         self.audio.ResetAll()
