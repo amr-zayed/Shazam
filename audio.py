@@ -1,4 +1,5 @@
 from operator import itemgetter
+from numpy.lib.function_base import hamming
 from scipy import signal
 import librosa
 import imagehash
@@ -11,7 +12,7 @@ from PIL import Image
 import os
 import math
 from FeaturesAndHashes import *
-
+from scipy.spatial import distance
 
 InfoLogger = logging.getLogger(__name__)
 InfoLogger.setLevel(logging.INFO)
@@ -133,11 +134,18 @@ class audio():
             songFile = open(os.path.join(path, filename), 'r')
             songHashes = songFile.readlines()
             similarity = 0
+            database_hash = ""
+            input_hash = ""
             for hashcount in range(len(songHashes)):
-                similarity = abs(hex_to_hash(songHashes[hashcount].strip())- hex_to_hash(self.HashesList[hashcount]))
-            self.similarityList.append([filename.split(sep=".")[0], (-1/2)*similarity+100])
+                #similarity += abs(hex_to_hash(songHashes[hashcount].strip())- hex_to_hash(self.HashesList[hashcount]))
+                database_hash += songHashes[hashcount].strip()
+                input_hash += self.HashesList[hashcount]
+            #self.similarityList.append([filename.split(sep=".")[0], 100*(1-(similarity/1020))])
+            self.similarityList.append([filename.split(sep=".")[0], 100*(1-abs(distance.hamming(list(database_hash),list(input_hash))))])
         self.similarityList = sorted(self.similarityList,key=lambda x: (x[1]), reverse=True)
 
+    def similarityPercentage(self):
+        q=0
     def GetTable(self):
         return np.array(self.similarityList)
 
